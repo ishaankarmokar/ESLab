@@ -1,0 +1,1 @@
+secondProj.o: secondProj.asm
