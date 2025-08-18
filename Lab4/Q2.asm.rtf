@@ -1,0 +1,50 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 AREA RESET, DATA, READONLY\
+	EXPORT __Vectors\
+	\
+__Vectors\
+	DCD 0x40001000\
+	DCD Reset_Handler\
+	\
+	ALIGN\
+	AREA mycode, CODE, READONLY\
+	ENTRY\
+	EXPORT Reset_Handler\
+	\
+Reset_Handler\
+	LDR R0, =SRC        ; R0 = address of SRC\
+    LDR R1, [R0]        ; R1 = value from SRC (e.g., 0x45)\
+    LDR R2, =RESULT     ; R2 = address of RESULT\
+    \
+    MOV R3, #0          ; R3 will hold the final hexadecimal result\
+    MOV R4, #1          ; R4 is the multiplier (starts at 10^0 = 1)\
+    MOV R10, #10        ; Constant for multiplication\
+    MOV R11, #2         ; R11 is our loop counter for 2 digits\
+	\
+UP\
+	AND R5, R1, #0xF    ; Isolate the last BCD digit (e.g., 5) into R5\
+	\
+	; Multiply R5 by R4 and add the result to R3\
+	MLA R3, R5, R4, R3  ; R3 = (R5 * R4) + R3\
+	\
+	LSR R1, R1, #4      ; Shift to get the next BCD digit\
+	MUL R4, R4, R10     ; Update the multiplier for the next place (1 -> 10)\
+	\
+	SUBS R11, R11, #1   ; Decrement loop counter and set flags\
+	BNE UP              ; If counter is not zero, loop again\
+	\
+	STR R3, [R2]        ; Store the final result\
+	\
+STOP\
+	B STOP\
+	\
+	AREA mydata, DATA, READWRITE\
+SRC DCD 0x00000045      ; Input: 2-digit BCD number\
+RESULT DCD 0\
+	END}
